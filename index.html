@@ -563,13 +563,14 @@
 
       <div class="settings-group">
         <label>API Key</label>
-        <input type="password" id="apiKeyInput" placeholder="貼上你的 Gemini API Key" autocomplete="off">
+        <form autocomplete="off" onsubmit="return false">
+          <input type="password" id="apiKeyInput" placeholder="貼上你的 Gemini API Key" autocomplete="new-password">
+        </form>
         <div class="key-hint">
           到 <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a> 免費申請 API Key<br>
           Key 只存在你的瀏覽器 localStorage，不會傳到任何其他地方
         </div>
       </div>
-
       <div class="settings-group">
         <label>模型</label>
         <select id="modelSelect">

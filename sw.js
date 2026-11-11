@@ -1,8 +1,9 @@
 // Service Worker for 即時翻譯 PWA
 // Caches the app shell for offline use (but API calls still need internet)
 
-const CACHE = 'tx-v1';
-const SHELL = ['/', '/index.html', '/manifest.json', '/icon.svg'];
+const CACHE = 'tx-v2';
+// Use relative paths so this works on any subdirectory (GitHub Pages, custom domain, etc.)
+const SHELL = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(

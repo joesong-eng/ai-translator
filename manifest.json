@@ -2,7 +2,7 @@
   "name": "即時翻譯",
   "short_name": "即時翻譯",
   "description": "中英即時語音翻譯，使用 Gemini AI",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0f0f23",
   "theme_color": "#1a1a2e",
