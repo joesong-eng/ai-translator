@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1a2e">
+  <meta name="apple-mobile-web-app-title" content="即時翻譯">
+  <meta name="application-name" content="即時翻譯">
+  <link rel="manifest" href="manifest.json">
+  <title>即時翻譯</title>
+  <style>
+    :root {
+      --bg: #0f0f23;
+      --surface: #1a1a2e;
+      --surface-light: #252542;
+      --primary: #4f8cff;
+      --primary-glow: #4f8cff44;
+      --accent: #00d4aa;
+      --danger: #ff4757;
+      --text: #e8e8f0;
+      --text-dim: #8888a0;
+      --border: #2a2a4a;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* ── Header ── */
+    header {
+      flex-shrink: 0;
+      padding: 14px 18px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding-top: max(14px, env(safe-area-inset-top));
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background 0.2s;
+    }
+
+    .icon-btn:active {
+      background: var(--primary);
+    }
+
+    .icon-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* ── Mode Selector ── */
+    .mode-bar {
+      flex-shrink: 0;
+      display: flex;
+      gap: 6px;
+      padding: 10px 18px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-dim);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .mode-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    /* ── Main Content ── */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ── Translation Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      min-height: 80px;
+      position: relative;
+    }
+
+    .card-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-text {
+      font-size: 17px;
+      line-height: 1.6;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .card-text.placeholder {
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .card.translation {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, var(--surface) 0%, #0a2a25 100%);
+    }
+
+    .card.translation .card-text {
+      color: #00ffcc;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .card-action-btn {
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .card-action-btn:active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* ── History ── */
+    .history-section {
+      margin-top: 8px;
+    }
+
+    .history-title {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .history-clear {
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .history-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .history-item .h-original {
+      color: var(--text-dim);
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .history-item .h-translation {
+      color: var(--accent);
+    }
+
+    /* ── Bottom Bar ── */
+    .bottom-bar {
+      flex-shrink: 0;
+      padding: 12px 18px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .text-input {
+      flex: 1;
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 12px 18px;
+      color: var(--text);
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .text-input:focus {
+      border-color: var(--primary);
+    }
+
+    .text-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .mic-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .mic-btn.listening {
+      background: var(--danger);
+      animation: pulse 1.2s ease-in-out infinite;
+      box-shadow: 0 0 24px #ff475744;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .send-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .send-btn:disabled {
+      opacity: 0.4;
+    }
+
+    /* ── Settings Panel ── */
+    .settings-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+    }
+
+    .settings-overlay.show {
+      display: block;
+    }
+
+    .settings-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      padding: 24px 20px;
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 101;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .settings-overlay.show .settings-panel {
+      transform: translateY(0);
+    }
+
+    .settings-panel h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .settings-group {
+      margin-bottom: 18px;
+    }
+
+    .settings-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .settings-group input,
+    .settings-group select {
+      width: 100%;
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+    }
+
+    .settings-group input:focus,
+    .settings-group select:focus {
+      border-color: var(--primary);
+    }
+
+    .settings-group select option {
+      background: var(--surface);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+    }
+
+    .toggle-row span {
+      font-size: 15px;
+    }
+
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle.on {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 22px;
+      height: 22px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle.on::after {
+      transform: translateX(20px);
+    }
+
+    .settings-close {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    .key-hint {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .key-hint a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    /* ── Status Indicator ── */
+    .status-bar {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      padding: 4px 0;
+      height: 20px;
+    }
+
+    .status-bar.error {
+      color: var(--danger);
+    }
+
+    .status-bar.busy {
+      color: var(--primary);
+    }
+
+    /* ── Empty State ── */
+    .empty-hint {
+      text-align: center;
+      color: var(--text-dim);
+      padding: 40px 20px;
+      font-size: 14px;
+    }
+
+    .empty-hint .big-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header>
+    <h1>🌐 即時翻譯</h1>
+    <div class="header-actions">
+      <button class="icon-btn" id="autoSpeakBtn" title="自動朗讀" onclick="toggleAutoSpeak()">🔊</button>
+      <button class="icon-btn" id="settingsBtn" title="設定" onclick="toggleSettings()">⚙️</button>
+    </div>
+  </header>
+
+  <!-- ── Mode Selector ── -->
+  <div class="mode-bar">
+    <button class="mode-btn active" data-mode="auto" onclick="setMode('auto')">自動偵測</button>
+    <button class="mode-btn" data-mode="zh-en" onclick="setMode('zh-en')">中 → 英</button>
+    <button class="mode-btn" data-mode="en-zh" onclick="setMode('en-zh')">英 → 中</button>
+  </div>
+
+  <!-- ── Main Content ── -->
+  <main id="main">
+    <div id="emptyHint" class="empty-hint">
+      <div class="big-icon">🎤</div>
+      <div>點麥克風說話，或直接打字</div>
+      <div style="margin-top:4px; font-size:12px; opacity:0.6">翻譯結果不會累積對話，每次都是獨立請求</div>
+    </div>
+
+    <div id="originalCard" class="card" style="display:none">
+      <div class="card-label">
+        <span id="originalLabel">原文</span>
+      </div>
+      <div class="card-text" id="originalText"></div>
+    </div>
+
+    <div id="translationCard" class="card translation" style="display:none">
+      <div class="card-label">
+        <span id="translationLabel">翻譯</span>
+      </div>
+      <div class="card-text" id="translationText"></div>
+      <div class="card-actions">
+        <button class="card-action-btn" onclick="speakTranslation()">🔊 朗讀</button>
+        <button class="card-action-btn" onclick="copyTranslation()">📋 複製</button>
+      </div>
+    </div>
+
+    <div class="history-section" id="historySection" style="display:none">
+      <div class="history-title">
+        <span>翻譯紀錄</span>
+        <span class="history-clear" onclick="clearHistory()">清除</span>
+      </div>
+      <div id="historyList"></div>
+    </div>
+  </main>
+
+  <!-- ── Status ── -->
+  <div class="status-bar" id="statusBar"></div>
+
+  <!-- ── Bottom Bar ── -->
+  <div class="bottom-bar">
+    <input type="text" class="text-input" id="textInput" placeholder="輸入文字..." 
+           onkeydown="if(event.key==='Enter')translateText()">
+    <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤</button>
+    <button class="send-btn" id="sendBtn" onclick="translateText()">➤</button>
+  </div>
+
+  <!-- ── Settings Overlay ── -->
+  <div class="settings-overlay" id="settingsOverlay" onclick="if(event.target===this)toggleSettings()">
+    <div class="settings-panel">
+      <h2>⚙️ 設定</h2>
+
+      <div class="settings-group">
+        <label>API Key</label>
+        <input type="password" id="apiKeyInput" placeholder="貼上你的 Gemini API Key" autocomplete="off">
+        <div class="key-hint">
+          到 <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a> 免費申請 API Key<br>
+          Key 只存在你的瀏覽器 localStorage，不會傳到任何其他地方
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <label>模型</label>
+        <select id="modelSelect">
+          <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite（最快，免費額度最省）</option>
+          <option value="gemini-3.6-flash">gemini-3.6-flash（穩定平衡）</option>
+          <option value="gemini-3.8-flash">gemini-3.8-flash（最強 Flash）</option>
+        </select>
+      </div>
+
+      <div class="toggle-row">
+        <span>自動朗讀翻譯結果</span>
+        <div class="toggle" id="autoSpeakToggle" onclick="toggleAutoSpeak()"></div>
+      </div>
+
+      <button class="settings-close" onclick="toggleSettings()">完成</button>
+    </div>
+  </div>
+
+  <script>
+    // ──────────────────────────────────────────────
+    //  State
+    // ──────────────────────────────────────────────
+    const STORAGE_KEY = 'gemini_api_key';
+    const STORAGE_MODEL = 'gemini_model';
+    const STORAGE_AUTOSPEAK = 'gemini_autospeak';
+    const STORAGE_MODE = 'gemini_mode';
+    const HISTORY_KEY = 'translation_history';
+
+    let apiKey = localStorage.getItem(STORAGE_KEY) || '';
+    let model = localStorage.getItem(STORAGE_MODEL) || 'gemini-3.5-flash-lite';
+    let autoSpeak = localStorage.getItem(STORAGE_AUTOSPEAK) === 'true';
+    let mode = localStorage.getItem(STORAGE_MODE) || 'auto';
+    let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+
+    let recognition = null;
+    let isListening = false;
+    let lastTranslation = '';
+
+    // ──────────────────────────────────────────────
+    //  System Prompt — 鐵律，每次都帶
+    // ──────────────────────────────────────────────
+    const SYSTEM_PROMPT = `你是一個專業翻譯引擎。嚴格遵守以下規則：
+
+1. 只輸出翻譯結果文字，不加任何解釋、說明、問候或評論
+2. 中文輸入 → 翻譯成英文
+3. 英文輸入 → 翻譯成中文
+4. 混合語言輸入 → 根據主要語言判斷翻譯方向
+5. 嚴禁回答問題、嚴禁聊天對話、嚴禁加任何前綴或後綴
+6. 保持原文語氣和語意，翻譯要自然流暢
+7. 輸出只能是翻譯結果，沒有其他任何內容`;
+
+    // ──────────────────────────────────────────────
+    //  Init
+    // ──────────────────────────────────────────────
+    function init() {
+      // Restore settings
+      document.getElementById('apiKeyInput').value = apiKey;
+      document.getElementById('modelSelect').value = model;
+      document.getElementById('autoSpeakToggle').classList.toggle('on', autoSpeak);
+      document.getElementById('autoSpeakBtn').classList.toggle('active', autoSpeak);
+
+      // Set mode buttons
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+      });
+
+      // Render history
+      renderHistory();
+
+      // Init speech recognition
+      initSpeech();
+
+      // If no API key, open settings
+      if (!apiKey) {
+        setTimeout(() => {
+          toggleSettings();
+          setStatus('請先輸入 API Key', 'error');
+        }, 300);
+      }
+    }
+
+    // ──────────────────────────────────────────────
+    //  Speech Recognition (Web Speech API)
+    // ──────────────────────────────────────────────
+    function initSpeech() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        console.warn('SpeechRecognition not supported');
+        return;
+      }
+      recognition = new SR();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (event) => {
+        let interim = '';
+        let final = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            final += transcript;
+          } else {
+            interim += transcript;
+          }
+        }
+        if (interim) {
+          document.getElementById('textInput').value = interim;
+        }
+        if (final) {
+          document.getElementById('textInput').value = final;
+          // Auto-translate when final result arrives
+          setTimeout(() => translateText(), 200);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        if (event.error === 'no-speech') {
+          setStatus('沒有偵測到語音，請再試一次');
+        } else if (event.error === 'not-allowed') {
+          setStatus('麥克風權限被拒絕，請在瀏覽器設定中允許', 'error');
+        } else {
+          setStatus('語音辨識錯誤: ' + event.error, 'error');
+        }
+        stopListening();
+      };
+
+      recognition.onend = () => {
+        stopListening();
+      };
+    }
+
+    function getRecognitionLang() {
+      if (mode === 'zh-en') return 'zh-TW';
+      if (mode === 'en-zh') return 'en-US';
+      // auto mode: default to zh-TW (can also pick up English)
+      return 'zh-TW';
+    }
+
+    function toggleMic() {
+      if (!recognition) {
+        setStatus('此瀏覽器不支援語音辨識，請用 Chrome', 'error');
+        return;
+      }
+      if (isListening) {
+        recognition.stop();
+        stopListening();
+      } else {
+        if (!apiKey) {
+          toggleSettings();
+          setStatus('請先輸入 API Key', 'error');
+          return;
+        }
+        recognition.lang = getRecognitionLang();
+        try {
+          recognition.start();
+          startListening();
+        } catch (e) {
+          // Sometimes recognition isn't ready yet
+          console.error(e);
+          setStatus('語音啟動失敗，請再試一次', 'error');
+        }
+      }
+    }
+
+    function startListening() {
+      isListening = true;
+      document.getElementById('micBtn').classList.add('listening');
+      setStatus('正在聆聽...');
+    }
+
+    function stopListening() {
+      isListening = false;
+      document.getElementById('micBtn').classList.remove('listening');
+    }
+
+    // ──────────────────────────────────────────────
+    //  Translation via Gemini Interactions API
+    // ──────────────────────────────────────────────
+    async function translateText() {
+      const text = document.getElementById('textInput').value.trim();
+      if (!text) return;
+
+      if (!apiKey) {
+        toggleSettings();
+        setStatus('請先輸入 API Key', 'error');
+        return;
+      }
+
+      // Show original
+      document.getElementById('emptyHint').style.display = 'none';
+      document.getElementById('originalCard').style.display = 'block';
+      document.getElementById('originalText').textContent = text;
+      document.getElementById('originalLabel').textContent = '原文';
+
+      // Show loading state on translation card
+      document.getElementById('translationCard').style.display = 'block';
+      document.getElementById('translationText').textContent = '翻譯中...';
+      document.getElementById('translationText').classList.add('placeholder');
+
+      setStatus('翻譯中...', 'busy');
+
+      // Build request — every request is stateless, system prompt always included
+      // API format verified from Google docs:
+      // https://aistudio.google.com/docs/text-generation
+      // Endpoint: POST https://generativelanguage.googleapis.com/v1beta/interactions
+      // Headers: x-goog-api-key, Content-Type, Api-Revision
+      // Body: { model, system_instruction, input, store, generation_config }
+      // Response: steps[] → find type=model_output → content[0].text
+
+      const requestBody = {
+        model: model,
+        system_instruction: SYSTEM_PROMPT,
+        input: text,
+        store: false,
+        generation_config: {
+          thinking_level: 'minimal',
+          max_output_tokens: 512
+        }
+      };
+
+      try {
+        const resp = await fetch(
+          'https://generativelanguage.googleapis.com/v1beta/interactions',
+          {
+            method: 'POST',
+            headers: {
+              'x-goog-api-key': apiKey,
+              'Content-Type': 'application/json',
+              'Api-Revision': '2026-05-20'
+            },
+            body: JSON.stringify(requestBody)
+          }
+        );
+
+        if (!resp.ok) {
+          const errBody = await resp.text();
+          let errMsg = `API 錯誤 (${resp.status})`;
+          try {
+            const errJson = JSON.parse(errBody);
+            if (errJson.error?.message) errMsg = errJson.error.message;
+          } catch (_) {}
+          throw new Error(errMsg);
+        }
+
+        const data = await resp.json();
+
+        // Extract translation from response:
+        // Find the step with type "model_output" in the steps array,
+        // then get content[0].text
+        let translation = '';
+        if (data.steps && Array.isArray(data.steps)) {
+          for (const step of data.steps) {
+            if (step.type === 'model_output' && step.content) {
+              for (const part of step.content) {
+                if (part.type === 'text' && part.text) {
+                  translation += part.text;
+                }
+              }
+            }
+          }
+        }
+
+        // Fallback: check outputText field (SDK convenience property)
+        if (!translation && data.outputText) {
+          translation = data.outputText;
+        }
+
+        if (!translation) {
+          throw new Error('翻譯結果為空');
+        }
+
+        lastTranslation = translation;
+
+        // Display
+        document.getElementById('translationText').textContent = translation;
+        document.getElementById('translationText').classList.remove('placeholder');
+
+        // Determine direction label
+        const isChineseInput = /[\u4e00-\u9fff]/.test(text);
+        document.getElementById('translationLabel').textContent =
+          isChineseInput ? '英文翻譯' : '中文翻譯';
+        document.getElementById('originalLabel').textContent =
+          isChineseInput ? '中文原文' : '英文原文';
+
+        // Save to history
+        addHistory(text, translation);
+
+        // Clear input
+        document.getElementById('textInput').value = '';
+
+        setStatus('');
+
+        // Auto-speak
+        if (autoSpeak) {
+          speak(translation, isChineseInput ? 'en-US' : 'zh-TW');
+        }
+
+      } catch (err) {
+        console.error('Translation error:', err);
+        document.getElementById('translationText').textContent = '❌ ' + err.message;
+        document.getElementById('translationText').classList.remove('placeholder');
+        setStatus(err.message, 'error');
+      }
+    }
+
+    // ──────────────────────────────────────────────
+    //  Text-to-Speech (Web Speech API)
+    // ──────────────────────────────────────────────
+    function speak(text, lang) {
+      if (!window.speechSynthesis) return;
+      speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = lang || 'zh-TW';
+      utter.rate = 1.0;
+      speechSynthesis.speak(utter);
+    }
+
+    function speakTranslation() {
+      if (lastTranslation) {
+        const isChineseResult = /[\u4e00-\u9fff]/.test(lastTranslation);
+        speak(lastTranslation, isChineseResult ? 'zh-TW' : 'en-US');
+      }
+    }
+
+    // ──────────────────────────────────────────────
+    //  Copy
+    // ──────────────────────────────────────────────
+    function copyTranslation() {
+      if (!lastTranslation) return;
+      navigator.clipboard.writeText(lastTranslation).then(() => {
+        setStatus('已複製到剪貼簿');
+        setTimeout(() => setStatus(''), 2000);
+      }).catch(() => {
+        setStatus('複製失敗', 'error');
+      });
+    }
+
+    // ──────────────────────────────────────────────
+    //  Mode
+    // ──────────────────────────────────────────────
+    function setMode(m) {
+      mode = m;
+      localStorage.setItem(STORAGE_MODE, m);
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === m);
+      });
+    }
+
+    // ──────────────────────────────────────────────
+    //  Settings
+    // ──────────────────────────────────────────────
+    function toggleSettings() {
+      const overlay = document.getElementById('settingsOverlay');
+      overlay.classList.toggle('show');
+      // Save settings when opening
+      if (overlay.classList.contains('show')) {
+        document.getElementById('apiKeyInput').value = apiKey;
+        document.getElementById('modelSelect').value = model;
+      }
+    }
+
+    // Save settings on close
+    document.getElementById('settingsOverlay').addEventListener('click', function(e) {
+      if (e.target === this) {
+        saveSettings();
+      }
+    });
+
+    // Also save when clicking the close button
+    document.querySelector('.settings-close').addEventListener('click', saveSettings);
+
+    function saveSettings() {
+      apiKey = document.getElementById('apiKeyInput').value.trim();
+      model = document.getElementById('modelSelect').value;
+      localStorage.setItem(STORAGE_KEY, apiKey);
+      localStorage.setItem(STORAGE_MODEL, model);
+      document.getElementById('settingsOverlay').classList.remove('show');
+      if (apiKey) setStatus('');
+    }
+
+    // ──────────────────────────────────────────────
+    //  Auto-speak toggle
+    // ──────────────────────────────────────────────
+    function toggleAutoSpeak() {
+      autoSpeak = !autoSpeak;
+      localStorage.setItem(STORAGE_AUTOSPEAK, autoSpeak);
+      document.getElementById('autoSpeakToggle').classList.toggle('on', autoSpeak);
+      document.getElementById('autoSpeakBtn').classList.toggle('active', autoSpeak);
+    }
+
+    // ──────────────────────────────────────────────
+    //  History
+    // ──────────────────────────────────────────────
+    function addHistory(original, translation) {
+      history.unshift({ original, translation, time: Date.now() });
+      if (history.length > 50) history = history.slice(0, 50);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const section = document.getElementById('historySection');
+      const list = document.getElementById('historyList');
+      if (history.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
+      section.style.display = 'block';
+      list.innerHTML = history.map(h => `
+        <div class="history-item">
+          <div class="h-original">${escapeHtml(h.original)}</div>
+          <div class="h-translation">${escapeHtml(h.translation)}</div>
+        </div>
+      `).join('');
+    }
+
+    function clearHistory() {
+      history = [];
+      localStorage.removeItem(HISTORY_KEY);
+      renderHistory();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ──────────────────────────────────────────────
+    //  Status
+    // ──────────────────────────────────────────────
+    function setStatus(msg, type) {
+      const bar = document.getElementById('statusBar');
+      bar.textContent = msg || '';
+      bar.className = 'status-bar' + (type ? ' ' + type : '');
+    }
+
+    // ──────────────────────────────────────────────
+    //  Start
+    // ──────────────────────────────────────────────
+    init();
+
+    // ── PWA Service Worker ──
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(function (e) {
+        console.log('SW register failed:', e);
+      });
+    }
+  </script>
+</body>
+</html>

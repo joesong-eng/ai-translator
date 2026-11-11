@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "AI 翻譯模式",
+  "version": "1.0.0",
+  "description": "在 Gemini 和 ChatGPT 網頁加入翻譯模式，自動注入翻譯指令，防止 AI 飄移成聊天模式",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://gemini.google.com/*",
+    "https://chatgpt.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://gemini.google.com/*", "https://chatgpt.com/*"],
+      "js": ["interceptor.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://gemini.google.com/*", "https://chatgpt.com/*"],
+      "js": ["sites.js", "content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI 翻譯模式"
+  }
+}

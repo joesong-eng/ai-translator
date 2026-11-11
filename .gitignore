@@ -1,0 +1,16 @@
+# API Keys / secrets — NEVER commit these
+.env*
+*.env
+*-kd
+*.key
+secrets/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/
+.idea/
+*.swp
