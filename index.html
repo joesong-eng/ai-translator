@@ -492,8 +492,7 @@ function scheduleRestart(ms) {
 
 // ── Toggle listen mode ──────────────────────────────
 function toggleListen() {
-  if (!apiKey) { openSettings(); setStatus('請先輸入 API Key','error'); return; }
-  if (!SR)     { setStatus('此裝置不支援語音辨識，請用 Chrome 或 Safari','error'); return; }
+  if (!SR) { setStatus('此裝置不支援語音辨識，請用 Chrome 或 Safari','error'); return; }
 
   if (listenMode) {
     stopListenMode();
@@ -581,7 +580,6 @@ function onSendText() {
 
 function translateText(text) {
   if (!text) return;
-  if (!apiKey) { openSettings(); setStatus('請先輸入 API Key','error'); return; }
   doTranslate(text);
 }
 
