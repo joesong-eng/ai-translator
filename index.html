@@ -345,21 +345,6 @@
   <div class="sheet">
     <h2>⚙️ 設定</h2>
     <div class="sg">
-      <label>Gemini API Key</label>
-      <form autocomplete="off" onsubmit="return false">
-        <input type="password" id="apiKeyInput" placeholder="貼上你的 API Key" autocomplete="new-password">
-      </form>
-      <div class="hint">到 <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a> 免費申請<br>Key 只存在你的瀏覽器，不傳到其他地方</div>
-    </div>
-    <div class="sg">
-      <label>模型</label>
-      <select id="modelSel">
-        <option value="gemini-1.5-flash-latest">gemini-1.5-flash（建議，快速免費）</option>
-        <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b（最省額度）</option>
-        <option value="gemini-1.5-pro-latest">gemini-1.5-pro（最強，較慢）</option>
-      </select>
-    </div>
-    <div class="sg">
       <label>語音辨識語言</label>
       <select id="speechLangSel">
         <option value="auto">自動（跟翻譯方向一致）</option>
@@ -386,19 +371,18 @@
 //  State
 // ═══════════════════════════════════════════════════════
 const SK = {
-  key:    'tx_apikey',
-  model:  'tx_model',
   dir:    'tx_dir',
   spk:    'tx_autospeak',
   pause:  'tx_pauseontts',
   slang:  'tx_speechlang'
 };
 
-let apiKey    = localStorage.getItem(SK.key)   || '';
-let model     = localStorage.getItem(SK.model) || 'gemini-1.5-flash-latest';
+// API endpoint — always our own server, no key needed in frontend
+const API_BASE = '';  // same origin, relative path
+
 let dir       = localStorage.getItem(SK.dir)   || 'auto';
 let autoSpeak = localStorage.getItem(SK.spk)   === 'true';
-let pauseOnTTS= localStorage.getItem(SK.pause) !== 'false'; // default true
+let pauseOnTTS= localStorage.getItem(SK.pause) !== 'false';
 let speechLang= localStorage.getItem(SK.slang) || 'auto';
 
 // ═══════════════════════════════════════════════════════
@@ -538,20 +522,6 @@ function stopListenMode() {
 // ═══════════════════════════════════════════════════════
 //  Translation
 // ═══════════════════════════════════════════════════════
-const SYSTEM_PROMPT = `你是一個專業翻譯引擎。嚴格遵守以下規則：
-1. 只輸出翻譯結果文字，不加任何解釋、說明、問候或評論
-2. 中文輸入 → 翻譯成英文
-3. 英文輸入 → 翻譯成中文
-4. 混合語言輸入 → 根據主要語言判斷翻譯方向
-5. 嚴禁回答問題、嚴禁聊天對話、嚴禁加任何前綴或後綴
-6. 保持原文語氣和語意，翻譯要自然流暢
-7. 輸出只能是翻譯結果，沒有其他任何內容`;
-
-function getDirectionHint() {
-  if (dir === 'zh-en') return '\n翻譯方向：中文 → 英文';
-  if (dir === 'en-zh') return '\n翻譯方向：英文 → 中文';
-  return '';
-}
 
 async function doTranslate(text) {
   if (!text) { scheduleRestart(200); return; }
@@ -561,34 +531,22 @@ async function doTranslate(text) {
   setCaption('', false);
   hideFeedEmpty();
 
-  // Add src bubble
   const pair = addPair(text);
 
   try {
-    const body = {
-      system_instruction: { parts: [{ text: SYSTEM_PROMPT + getDirectionHint() }] },
-      contents: [{ role: 'user', parts: [{ text }] }],
-      generationConfig: { maxOutputTokens: 512, temperature: 0.1 }
-    };
-
-    const resp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
-      { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }
-    );
+    const resp = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, direction: dir })
+    });
 
     if (!resp.ok) {
-      let msg = `API 錯誤 (${resp.status})`;
-      try { const j=await resp.json(); if(j.error?.message) msg=j.error.message; } catch(e){}
-      throw new Error(msg);
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${resp.status}`);
     }
 
     const data = await resp.json();
-    let translation = '';
-    if (data.candidates?.[0]?.content?.parts) {
-      for (const p of data.candidates[0].content.parts) {
-        if (p.text) translation += p.text;
-      }
-    }
+    const translation = data.translation;
     if (!translation) throw new Error('翻譯結果為空');
 
     // Update bubble
@@ -775,8 +733,6 @@ function setDir(d) {
 //  Settings
 // ═══════════════════════════════════════════════════════
 function openSettings() {
-  document.getElementById('apiKeyInput').value = apiKey;
-  document.getElementById('modelSel').value = model;
   document.getElementById('speechLangSel').value = speechLang;
   document.getElementById('autoSpeakTog').classList.toggle('on', autoSpeak);
   document.getElementById('pauseOnTTSTog').classList.toggle('on', pauseOnTTS);
@@ -784,14 +740,9 @@ function openSettings() {
 }
 
 function closeSettings() {
-  apiKey    = document.getElementById('apiKeyInput').value.trim();
-  model     = document.getElementById('modelSel').value;
-  speechLang= document.getElementById('speechLangSel').value;
-  localStorage.setItem(SK.key,   apiKey);
-  localStorage.setItem(SK.model, model);
+  speechLang = document.getElementById('speechLangSel').value;
   localStorage.setItem(SK.slang, speechLang);
   document.getElementById('sheetBg').classList.remove('show');
-  if (apiKey) setStatus('');
 }
 
 function toggleAutoSpeak() {
@@ -812,7 +763,6 @@ function togglePauseOnTTS() {
 function init() {
   document.querySelectorAll('.dir-btn').forEach(b => b.classList.toggle('active', b.dataset.dir === dir));
   if (!SR) setStatus('此裝置不支援語音辨識，可用打字模式', 'error');
-  if (!apiKey) setTimeout(() => { openSettings(); setStatus('請先輸入 API Key','error'); }, 400);
   initRecog();
 }
 
