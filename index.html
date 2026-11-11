@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#1a1a2e">
+  <meta name="theme-color" content="#0f0f23">
   <meta name="apple-mobile-web-app-title" content="即時翻譯">
   <meta name="application-name" content="即時翻譯">
   <link rel="manifest" href="manifest.json">
@@ -16,30 +16,18 @@
     :root {
       --bg: #0f0f23;
       --surface: #1a1a2e;
-      --surface-light: #252542;
+      --surface2: #252542;
       --primary: #4f8cff;
-      --primary-glow: #4f8cff44;
       --accent: #00d4aa;
       --danger: #ff4757;
+      --warn: #ffaa00;
       --text: #e8e8f0;
-      --text-dim: #8888a0;
+      --dim: #8888a0;
       --border: #2a2a4a;
-      --radius: 16px;
-      --radius-sm: 10px;
+      --r: 16px;
     }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      height: 100%;
-      overflow: hidden;
-    }
-
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html, body { height:100%; overflow:hidden; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
       background: var(--bg);
@@ -49,571 +37,508 @@
       user-select: none;
     }
 
-    /* ── Header ── */
-    header {
+    /* ── Top bar ── */
+    .topbar {
       flex-shrink: 0;
-      padding: 14px 18px 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: max(14px, env(safe-area-inset-top)) 16px 10px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding-top: max(14px, env(safe-area-inset-top));
     }
-
-    header h1 {
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 8px;
-    }
-
+    .topbar h1 { font-size: 17px; font-weight: 600; }
+    .topbar-right { display: flex; gap: 8px; }
     .icon-btn {
-      background: var(--surface-light);
-      border: 1px solid var(--border);
-      color: var(--text);
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 18px;
-      transition: background 0.2s;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); font-size: 17px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
     }
+    .icon-btn.active { background: var(--primary); border-color: var(--primary); }
+    .icon-btn:active { opacity: .7; }
 
-    .icon-btn:active {
-      background: var(--primary);
-    }
-
-    .icon-btn.active {
-      background: var(--primary);
-      border-color: var(--primary);
-    }
-
-    /* ── Mode Selector ── */
-    .mode-bar {
+    /* ── Direction tabs ── */
+    .dir-bar {
       flex-shrink: 0;
-      display: flex;
-      gap: 6px;
-      padding: 10px 18px;
+      display: flex; gap: 6px;
+      padding: 8px 16px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
     }
-
-    .mode-btn {
-      flex: 1;
-      padding: 10px;
-      background: var(--surface-light);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text-dim);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
+    .dir-btn {
+      flex: 1; padding: 9px 4px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--dim);
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; text-align: center; transition: all .2s;
     }
+    .dir-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    .mode-btn.active {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
-    }
-
-    /* ── Main Content ── */
-    main {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    /* ── Scroll area ── */
+    .feed {
+      flex: 1; overflow-y: auto;
+      padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 10px;
       -webkit-overflow-scrolling: touch;
     }
+    .feed-empty {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--dim); font-size: 14px; gap: 10px;
+      text-align: center; padding: 40px 20px;
+    }
+    .feed-empty .ei { font-size: 56px; opacity: .3; }
+    .feed-empty .et { line-height: 1.6; }
 
-    /* ── Translation Card ── */
-    .card {
-      background: var(--surface);
+    /* ── Bubble pair ── */
+    .pair { display: flex; flex-direction: column; gap: 6px; }
+    .bubble {
+      border-radius: var(--r);
+      padding: 12px 16px;
+      font-size: 16px; line-height: 1.6;
+      word-break: break-word; white-space: pre-wrap;
+      max-width: 90%;
+    }
+    .bubble.src {
+      background: var(--surface2);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      min-height: 80px;
-      position: relative;
+      align-self: flex-end;
+      color: var(--dim);
+      font-size: 15px;
     }
-
-    .card-label {
-      font-size: 12px;
-      color: var(--text-dim);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .card-text {
-      font-size: 17px;
-      line-height: 1.6;
-      word-break: break-word;
-      white-space: pre-wrap;
-    }
-
-    .card-text.placeholder {
-      color: var(--text-dim);
-      font-style: italic;
-    }
-
-    .card.translation {
-      border-color: var(--accent);
-      background: linear-gradient(135deg, var(--surface) 0%, #0a2a25 100%);
-    }
-
-    .card.translation .card-text {
+    .bubble.dst {
+      background: linear-gradient(135deg, #0a2a25 0%, #0d1f3c 100%);
+      border: 1px solid var(--accent);
+      align-self: flex-start;
       color: #00ffcc;
+      font-size: 17px;
+      font-weight: 500;
     }
-
-    .card-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
+    .bubble.dst.translating {
+      color: var(--dim);
+      font-style: italic;
+      border-color: var(--border);
+      background: var(--surface2);
     }
-
-    .card-action-btn {
-      background: var(--surface-light);
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
+    .bubble-actions {
+      display: flex; gap: 6px;
+      align-self: flex-start;
+      margin-top: -2px;
     }
-
-    .card-action-btn:active {
-      background: var(--primary);
-      color: #fff;
+    .bact {
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px; padding: 4px 10px;
+      color: var(--dim); font-size: 12px; cursor: pointer;
+      transition: all .15s;
     }
+    .bact:active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    /* ── History ── */
-    .history-section {
-      margin-top: 8px;
-    }
-
-    .history-title {
-      font-size: 13px;
-      color: var(--text-dim);
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .history-clear {
-      color: var(--danger);
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    .history-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px 14px;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-
-    .history-item .h-original {
-      color: var(--text-dim);
-      font-size: 13px;
-      margin-bottom: 4px;
-    }
-
-    .history-item .h-translation {
-      color: var(--accent);
-    }
-
-    /* ── Bottom Bar ── */
-    .bottom-bar {
+    /* ── Live caption (interim result) ── */
+    .live-caption {
       flex-shrink: 0;
-      padding: 12px 18px;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      min-height: 36px;
+      padding: 8px 16px;
+      font-size: 15px; color: var(--dim);
+      font-style: italic;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      word-break: break-word;
+    }
+    .live-caption.active { color: var(--text); }
+
+    /* ── Status strip ── */
+    .status-strip {
+      flex-shrink: 0;
+      text-align: center; font-size: 12px;
+      padding: 3px 0; min-height: 20px;
+      color: var(--dim);
+    }
+    .status-strip.busy  { color: var(--primary); }
+    .status-strip.error { color: var(--danger); }
+    .status-strip.ok    { color: var(--accent); }
+
+    /* ── Big mic button area ── */
+    .mic-area {
+      flex-shrink: 0;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+      padding: 14px 16px max(16px, env(safe-area-inset-bottom));
       background: var(--surface);
       border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    }
+    .mic-ring {
+      position: relative;
+      width: 80px; height: 80px;
+    }
+    .mic-ring::before {
+      content: '';
+      position: absolute; inset: -6px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      transition: border-color .3s;
+    }
+    .mic-ring.active::before {
+      border-color: var(--danger);
+      animation: ring-pulse 1.4s ease-in-out infinite;
+    }
+    .mic-ring.speaking::before { border-color: var(--warn); }
+    @keyframes ring-pulse {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50%      { transform: scale(1.1); opacity: .6; }
+    }
+    .mic-btn {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: none; cursor: pointer;
+      font-size: 32px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .25s;
+      position: relative; z-index: 1;
+      background: var(--surface2);
+      box-shadow: 0 2px 16px rgba(0,0,0,.3);
+    }
+    .mic-btn.idle    { background: var(--primary); box-shadow: 0 0 24px #4f8cff44; }
+    .mic-btn.listening { background: var(--danger); box-shadow: 0 0 28px #ff475744; animation: mic-pulse 1.2s ease-in-out infinite; }
+    .mic-btn.translating { background: var(--warn); box-shadow: 0 0 24px #ffaa0044; }
+    .mic-btn.speaking  { background: var(--accent); box-shadow: 0 0 24px #00d4aa44; }
+    @keyframes mic-pulse {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.06); }
+    }
+    .mic-label {
+      font-size: 12px; color: var(--dim);
+      text-align: center; height: 16px;
     }
 
+    /* ── Text fallback row ── */
+    .text-row {
+      display: flex; gap: 8px;
+      padding: 0 16px 10px;
+      background: var(--surface);
+    }
     .text-input {
       flex: 1;
-      background: var(--surface-light);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 12px 18px;
-      color: var(--text);
-      font-size: 16px;
-      outline: none;
-      transition: border-color 0.2s;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 24px; padding: 10px 16px;
+      color: var(--text); font-size: 15px; outline: none;
+      transition: border-color .2s;
     }
-
-    .text-input:focus {
-      border-color: var(--primary);
-    }
-
-    .text-input::placeholder {
-      color: var(--text-dim);
-    }
-
-    .mic-btn {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      border: none;
-      background: var(--primary);
-      color: #fff;
-      font-size: 24px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.2s;
-      box-shadow: 0 0 20px var(--primary-glow);
-    }
-
-    .mic-btn.listening {
-      background: var(--danger);
-      animation: pulse 1.2s ease-in-out infinite;
-      box-shadow: 0 0 24px #ff475744;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-
+    .text-input:focus { border-color: var(--primary); }
+    .text-input::placeholder { color: var(--dim); }
     .send-btn {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      border: none;
-      background: var(--accent);
-      color: #fff;
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.2s;
+      width: 44px; height: 44px; border-radius: 50%;
+      border: none; background: var(--accent);
+      color: #fff; font-size: 18px; cursor: pointer;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
     }
+    .send-btn:active { opacity: .7; }
 
-    .send-btn:disabled {
-      opacity: 0.4;
+    /* ── Settings sheet ── */
+    .sheet-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.55); z-index: 200;
     }
-
-    /* ── Settings Panel ── */
-    .settings-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      z-index: 100;
-    }
-
-    .settings-overlay.show {
-      display: block;
-    }
-
-    .settings-panel {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+    .sheet-bg.show { display: block; }
+    .sheet {
+      position: fixed; bottom: 0; left: 0; right: 0;
       background: var(--surface);
       border-radius: 24px 24px 0 0;
-      padding: 24px 20px;
-      padding-bottom: max(24px, env(safe-area-inset-bottom));
-      z-index: 101;
+      padding: 24px 20px max(24px, env(safe-area-inset-bottom));
+      z-index: 201;
       transform: translateY(100%);
-      transition: transform 0.3s ease;
-      max-height: 80vh;
-      overflow-y: auto;
+      transition: transform .3s ease;
+      max-height: 85vh; overflow-y: auto;
     }
-
-    .settings-overlay.show .settings-panel {
-      transform: translateY(0);
-    }
-
-    .settings-panel h2 {
-      font-size: 18px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .settings-group {
-      margin-bottom: 18px;
-    }
-
-    .settings-group label {
-      display: block;
-      font-size: 13px;
-      color: var(--text-dim);
-      margin-bottom: 6px;
-    }
-
-    .settings-group input,
-    .settings-group select {
+    .sheet-bg.show .sheet { transform: translateY(0); }
+    .sheet h2 { font-size: 17px; margin-bottom: 20px; text-align: center; }
+    .sg { margin-bottom: 16px; }
+    .sg label { display: block; font-size: 12px; color: var(--dim); margin-bottom: 5px; }
+    .sg input, .sg select {
       width: 100%;
-      background: var(--surface-light);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      color: var(--text);
-      font-size: 15px;
-      outline: none;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 13px;
+      color: var(--text); font-size: 15px; outline: none;
     }
+    .sg input:focus, .sg select:focus { border-color: var(--primary); }
+    .sg select option { background: var(--surface); }
+    .tr { display:flex; align-items:center; justify-content:space-between; padding: 10px 0; }
+    .tr span { font-size: 15px; }
+    .tog {
+      position: relative; width: 46px; height: 26px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 13px; cursor: pointer; transition: background .2s;
+    }
+    .tog.on { background: var(--primary); border-color: var(--primary); }
+    .tog::after {
+      content:''; position:absolute; top:2px; left:2px;
+      width:20px; height:20px; background:#fff;
+      border-radius:50%; transition:transform .2s;
+    }
+    .tog.on::after { transform: translateX(20px); }
+    .sheet-close {
+      width:100%; padding:13px;
+      background: var(--primary); color:#fff;
+      border:none; border-radius:10px;
+      font-size:15px; font-weight:600; cursor:pointer; margin-top:12px;
+    }
+    .hint { font-size:11px; color:var(--dim); margin-top:5px; line-height:1.5; }
+    .hint a { color:var(--primary); text-decoration:none; }
 
-    .settings-group input:focus,
-    .settings-group select:focus {
-      border-color: var(--primary);
+    /* ── History clear ── */
+    .hist-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 2px 0 6px;
+      font-size: 12px; color: var(--dim);
     }
-
-    .settings-group select option {
-      background: var(--surface);
-    }
-
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-    }
-
-    .toggle-row span {
-      font-size: 15px;
-    }
-
-    .toggle {
-      position: relative;
-      width: 48px;
-      height: 28px;
-      background: var(--surface-light);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .toggle.on {
-      background: var(--primary);
-      border-color: var(--primary);
-    }
-
-    .toggle::after {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 22px;
-      height: 22px;
-      background: #fff;
-      border-radius: 50%;
-      transition: transform 0.2s;
-    }
-
-    .toggle.on::after {
-      transform: translateX(20px);
-    }
-
-    .settings-close {
-      width: 100%;
-      padding: 14px;
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 12px;
-    }
-
-    .key-hint {
-      font-size: 12px;
-      color: var(--text-dim);
-      margin-top: 6px;
-      line-height: 1.5;
-    }
-
-    .key-hint a {
-      color: var(--primary);
-      text-decoration: none;
-    }
-
-    /* ── Status Indicator ── */
-    .status-bar {
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-dim);
-      padding: 4px 0;
-      height: 20px;
-    }
-
-    .status-bar.error {
-      color: var(--danger);
-    }
-
-    .status-bar.busy {
-      color: var(--primary);
-    }
-
-    /* ── Empty State ── */
-    .empty-hint {
-      text-align: center;
-      color: var(--text-dim);
-      padding: 40px 20px;
-      font-size: 14px;
-    }
-
-    .empty-hint .big-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-      opacity: 0.4;
-    }
+    .hist-clear { color: var(--danger); cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <!-- ── Header ── -->
-  <header>
-    <h1>🌐 即時翻譯</h1>
-    <div class="header-actions">
-      <button class="icon-btn" id="autoSpeakBtn" title="自動朗讀" onclick="toggleAutoSpeak()">🔊</button>
-      <button class="icon-btn" id="settingsBtn" title="設定" onclick="toggleSettings()">⚙️</button>
-    </div>
-  </header>
-
-  <!-- ── Mode Selector ── -->
-  <div class="mode-bar">
-    <button class="mode-btn active" data-mode="auto" onclick="setMode('auto')">自動偵測</button>
-    <button class="mode-btn" data-mode="zh-en" onclick="setMode('zh-en')">中 → 英</button>
-    <button class="mode-btn" data-mode="en-zh" onclick="setMode('en-zh')">英 → 中</button>
+<!-- Top bar -->
+<div class="topbar">
+  <h1>🌐 即時翻譯</h1>
+  <div class="topbar-right">
+    <button class="icon-btn" id="settingsBtn" onclick="openSettings()">⚙️</button>
   </div>
+</div>
 
-  <!-- ── Main Content ── -->
-  <main id="main">
-    <div id="emptyHint" class="empty-hint">
-      <div class="big-icon">🎤</div>
-      <div>點麥克風說話，或直接打字</div>
-      <div style="margin-top:4px; font-size:12px; opacity:0.6">翻譯結果不會累積對話，每次都是獨立請求</div>
-    </div>
+<!-- Direction -->
+<div class="dir-bar">
+  <button class="dir-btn active" data-dir="auto"  onclick="setDir('auto')">自動偵測</button>
+  <button class="dir-btn"        data-dir="zh-en" onclick="setDir('zh-en')">中 → 英</button>
+  <button class="dir-btn"        data-dir="en-zh" onclick="setDir('en-zh')">英 → 中</button>
+</div>
 
-    <div id="originalCard" class="card" style="display:none">
-      <div class="card-label">
-        <span id="originalLabel">原文</span>
-      </div>
-      <div class="card-text" id="originalText"></div>
-    </div>
-
-    <div id="translationCard" class="card translation" style="display:none">
-      <div class="card-label">
-        <span id="translationLabel">翻譯</span>
-      </div>
-      <div class="card-text" id="translationText"></div>
-      <div class="card-actions">
-        <button class="card-action-btn" onclick="speakTranslation()">🔊 朗讀</button>
-        <button class="card-action-btn" onclick="copyTranslation()">📋 複製</button>
-      </div>
-    </div>
-
-    <div class="history-section" id="historySection" style="display:none">
-      <div class="history-title">
-        <span>翻譯紀錄</span>
-        <span class="history-clear" onclick="clearHistory()">清除</span>
-      </div>
-      <div id="historyList"></div>
-    </div>
-  </main>
-
-  <!-- ── Status ── -->
-  <div class="status-bar" id="statusBar"></div>
-
-  <!-- ── Bottom Bar ── -->
-  <div class="bottom-bar">
-    <input type="text" class="text-input" id="textInput" placeholder="輸入文字..." 
-           onkeydown="if(event.key==='Enter')translateText()">
-    <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤</button>
-    <button class="send-btn" id="sendBtn" onclick="translateText()">➤</button>
+<!-- Feed -->
+<div class="feed" id="feed">
+  <div class="feed-empty" id="feedEmpty">
+    <div class="ei">🎤</div>
+    <div class="et">按下麥克風開啟持續聆聽模式<br><span style="font-size:12px;opacity:.6">說話停頓後自動翻譯並朗讀，<br>再次說話繼續下一句</span></div>
   </div>
+</div>
 
-  <!-- ── Settings Overlay ── -->
-  <div class="settings-overlay" id="settingsOverlay" onclick="if(event.target===this)toggleSettings()">
-    <div class="settings-panel">
-      <h2>⚙️ 設定</h2>
+<!-- Live caption (interim) -->
+<div class="live-caption" id="liveCaption">　</div>
 
-      <div class="settings-group">
-        <label>API Key</label>
-        <form autocomplete="off" onsubmit="return false">
-          <input type="password" id="apiKeyInput" placeholder="貼上你的 Gemini API Key" autocomplete="new-password">
-        </form>
-        <div class="key-hint">
-          到 <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a> 免費申請 API Key<br>
-          Key 只存在你的瀏覽器 localStorage，不會傳到任何其他地方
-        </div>
-      </div>
-      <div class="settings-group">
-        <label>模型</label>
-        <select id="modelSelect">
-          <option value="gemini-1.5-flash-latest">gemini-1.5-flash（快速，免費額度充足）</option>
-          <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b（最省，高量翻譯用）</option>
-          <option value="gemini-1.5-pro-latest">gemini-1.5-pro（最強，較慢）</option>
-        </select>
-      </div>
+<!-- Status -->
+<div class="status-strip" id="status"></div>
 
-      <div class="toggle-row">
-        <span>自動朗讀翻譯結果</span>
-        <div class="toggle" id="autoSpeakToggle" onclick="toggleAutoSpeak()"></div>
-      </div>
+<!-- Text input fallback -->
+<div class="text-row">
+  <input type="text" class="text-input" id="textInput" placeholder="也可以打字翻譯..."
+         onkeydown="if(event.key==='Enter'){translateText(this.value.trim());this.value='';}">
+  <button class="send-btn" onclick="onSendText()">➤</button>
+</div>
 
-      <button class="settings-close" onclick="toggleSettings()">完成</button>
-    </div>
+<!-- Mic -->
+<div class="mic-area">
+  <div class="mic-ring" id="micRing">
+    <button class="mic-btn idle" id="micBtn" onclick="toggleListen()">🎤</button>
   </div>
+  <div class="mic-label" id="micLabel">點擊開始聆聽</div>
+</div>
 
-  <script>
-    // ──────────────────────────────────────────────
-    //  State
-    // ──────────────────────────────────────────────
-    const STORAGE_KEY = 'gemini_api_key';
-    const STORAGE_MODEL = 'gemini_model';
-    const STORAGE_AUTOSPEAK = 'gemini_autospeak';
-    const STORAGE_MODE = 'gemini_mode';
-    const HISTORY_KEY = 'translation_history';
+<!-- Settings sheet -->
+<div class="sheet-bg" id="sheetBg" onclick="if(event.target===this)closeSettings()">
+  <div class="sheet">
+    <h2>⚙️ 設定</h2>
+    <div class="sg">
+      <label>Gemini API Key</label>
+      <form autocomplete="off" onsubmit="return false">
+        <input type="password" id="apiKeyInput" placeholder="貼上你的 API Key" autocomplete="new-password">
+      </form>
+      <div class="hint">到 <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a> 免費申請<br>Key 只存在你的瀏覽器，不傳到其他地方</div>
+    </div>
+    <div class="sg">
+      <label>模型</label>
+      <select id="modelSel">
+        <option value="gemini-1.5-flash-latest">gemini-1.5-flash（建議，快速免費）</option>
+        <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b（最省額度）</option>
+        <option value="gemini-1.5-pro-latest">gemini-1.5-pro（最強，較慢）</option>
+      </select>
+    </div>
+    <div class="sg">
+      <label>語音辨識語言</label>
+      <select id="speechLangSel">
+        <option value="auto">自動（跟翻譯方向一致）</option>
+        <option value="zh-TW">中文（台灣）</option>
+        <option value="zh-CN">中文（普通話）</option>
+        <option value="en-US">English (US)</option>
+        <option value="en-GB">English (UK)</option>
+      </select>
+    </div>
+    <div class="tr">
+      <span>翻譯後自動朗讀</span>
+      <div class="tog" id="autoSpeakTog" onclick="toggleAutoSpeak()"></div>
+    </div>
+    <div class="tr">
+      <span>朗讀時暫停聆聽</span>
+      <div class="tog on" id="pauseOnTTSTog" onclick="togglePauseOnTTS()"></div>
+    </div>
+    <button class="sheet-close" onclick="closeSettings()">完成</button>
+  </div>
+</div>
 
-    let apiKey = localStorage.getItem(STORAGE_KEY) || '';
-    let model = localStorage.getItem(STORAGE_MODEL) || 'gemini-1.5-flash-latest';
-    let autoSpeak = localStorage.getItem(STORAGE_AUTOSPEAK) === 'true';
-    let mode = localStorage.getItem(STORAGE_MODE) || 'auto';
-    let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+<script>
+// ═══════════════════════════════════════════════════════
+//  State
+// ═══════════════════════════════════════════════════════
+const SK = {
+  key:    'tx_apikey',
+  model:  'tx_model',
+  dir:    'tx_dir',
+  spk:    'tx_autospeak',
+  pause:  'tx_pauseontts',
+  slang:  'tx_speechlang'
+};
 
-    let recognition = null;
-    let isListening = false;
-    let lastTranslation = '';
+let apiKey    = localStorage.getItem(SK.key)   || '';
+let model     = localStorage.getItem(SK.model) || 'gemini-1.5-flash-latest';
+let dir       = localStorage.getItem(SK.dir)   || 'auto';
+let autoSpeak = localStorage.getItem(SK.spk)   === 'true';
+let pauseOnTTS= localStorage.getItem(SK.pause) !== 'false'; // default true
+let speechLang= localStorage.getItem(SK.slang) || 'auto';
 
-    // ──────────────────────────────────────────────
-    //  System Prompt — 鐵律，每次都帶
-    // ──────────────────────────────────────────────
-    const SYSTEM_PROMPT = `你是一個專業翻譯引擎。嚴格遵守以下規則：
+// ═══════════════════════════════════════════════════════
+//  Speech Recognition
+// ═══════════════════════════════════════════════════════
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null;
+let listenMode = false;   // user wants continuous listening
+let isSpeaking = false;   // TTS is playing
+let isTranslating = false;// API call in flight
+let restartTimer = null;
+let lastFinal = '';       // deduplicate
 
+// Mic FSM states: idle | listening | translating | speaking
+let micState = 'idle';
+
+function getSpeechLang() {
+  if (speechLang !== 'auto') return speechLang;
+  if (dir === 'zh-en') return 'zh-TW';
+  if (dir === 'en-zh') return 'en-US';
+  return 'zh-TW'; // auto: default Chinese, Gemini will figure out direction
+}
+
+function initRecog() {
+  if (!SR) return;
+  recog = new SR();
+  recog.continuous    = false; // We restart manually for iOS compatibility
+  recog.interimResults= true;
+  recog.maxAlternatives = 1;
+  recog.lang = getSpeechLang();
+
+  recog.onstart = () => {
+    setMicState('listening');
+    setStatus('聆聽中…');
+    setCaption('', false);
+  };
+
+  recog.onresult = (e) => {
+    let interim = '';
+    let final   = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    if (interim) setCaption(interim, true);
+    if (final) {
+      setCaption(final, true);
+      lastFinal = final;
+    }
+  };
+
+  recog.onspeechend = () => {
+    // Speech stopped — commit what we have
+    recog.stop();
+  };
+
+  recog.onerror = (e) => {
+    if (e.error === 'no-speech') {
+      // Silence — just restart
+      scheduleRestart(300);
+      return;
+    }
+    if (e.error === 'not-allowed') {
+      setStatus('麥克風權限被拒絕', 'error');
+      stopListenMode();
+      return;
+    }
+    if (e.error === 'aborted') return; // we caused this
+    setStatus('語音錯誤: ' + e.error, 'error');
+    scheduleRestart(1000);
+  };
+
+  recog.onend = () => {
+    // Fired after stop(). If we have a final result, translate it.
+    if (listenMode) {
+      const text = lastFinal.trim();
+      lastFinal = '';
+      if (text) {
+        doTranslate(text);
+      } else {
+        // Nothing heard — restart
+        scheduleRestart(200);
+      }
+    } else {
+      setMicState('idle');
+      setStatus('');
+      setCaption('', false);
+    }
+  };
+}
+
+function startRecog() {
+  if (!recog) { setStatus('此裝置不支援語音辨識', 'error'); return; }
+  if (isSpeaking && pauseOnTTS) return; // wait for TTS to finish
+  recog.lang = getSpeechLang();
+  try { recog.start(); } catch(e) { scheduleRestart(400); }
+}
+
+function scheduleRestart(ms) {
+  if (!listenMode) return;
+  if (restartTimer) clearTimeout(restartTimer);
+  restartTimer = setTimeout(() => {
+    if (listenMode && !isSpeaking && !isTranslating) startRecog();
+  }, ms);
+}
+
+// ── Toggle listen mode ──────────────────────────────
+function toggleListen() {
+  if (!apiKey) { openSettings(); setStatus('請先輸入 API Key','error'); return; }
+  if (!SR)     { setStatus('此裝置不支援語音辨識，請用 Chrome 或 Safari','error'); return; }
+
+  if (listenMode) {
+    stopListenMode();
+  } else {
+    startListenMode();
+  }
+}
+
+function startListenMode() {
+  listenMode = true;
+  if (!recog) initRecog();
+  startRecog();
+  setMicLabel('點擊停止');
+}
+
+function stopListenMode() {
+  listenMode = false;
+  if (restartTimer) { clearTimeout(restartTimer); restartTimer = null; }
+  try { recog && recog.abort(); } catch(e) {}
+  setMicState('idle');
+  setStatus('');
+  setCaption('', false);
+  setMicLabel('點擊開始聆聽');
+}
+
+// ═══════════════════════════════════════════════════════
+//  Translation
+// ═══════════════════════════════════════════════════════
+const SYSTEM_PROMPT = `你是一個專業翻譯引擎。嚴格遵守以下規則：
 1. 只輸出翻譯結果文字，不加任何解釋、說明、問候或評論
 2. 中文輸入 → 翻譯成英文
 3. 英文輸入 → 翻譯成中文
@@ -622,398 +547,281 @@
 6. 保持原文語氣和語意，翻譯要自然流暢
 7. 輸出只能是翻譯結果，沒有其他任何內容`;
 
-    // ──────────────────────────────────────────────
-    //  Init
-    // ──────────────────────────────────────────────
-    function init() {
-      // Restore settings
-      document.getElementById('apiKeyInput').value = apiKey;
-      document.getElementById('modelSelect').value = model;
-      document.getElementById('autoSpeakToggle').classList.toggle('on', autoSpeak);
-      document.getElementById('autoSpeakBtn').classList.toggle('active', autoSpeak);
+function getDirectionHint() {
+  if (dir === 'zh-en') return '\n翻譯方向：中文 → 英文';
+  if (dir === 'en-zh') return '\n翻譯方向：英文 → 中文';
+  return '';
+}
 
-      // Set mode buttons
-      document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.mode === mode);
-      });
+async function doTranslate(text) {
+  if (!text) { scheduleRestart(200); return; }
+  isTranslating = true;
+  setMicState('translating');
+  setStatus('翻譯中…', 'busy');
+  setCaption('', false);
+  hideFeedEmpty();
 
-      // Render history
-      renderHistory();
+  // Add src bubble
+  const pair = addPair(text);
 
-      // Init speech recognition
-      initSpeech();
+  try {
+    const body = {
+      system_instruction: { parts: [{ text: SYSTEM_PROMPT + getDirectionHint() }] },
+      contents: [{ role: 'user', parts: [{ text }] }],
+      generationConfig: { maxOutputTokens: 512, temperature: 0.1 }
+    };
 
-      // If no API key, open settings
-      if (!apiKey) {
-        setTimeout(() => {
-          toggleSettings();
-          setStatus('請先輸入 API Key', 'error');
-        }, 300);
-      }
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+      { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }
+    );
+
+    if (!resp.ok) {
+      let msg = `API 錯誤 (${resp.status})`;
+      try { const j=await resp.json(); if(j.error?.message) msg=j.error.message; } catch(e){}
+      throw new Error(msg);
     }
 
-    // ──────────────────────────────────────────────
-    //  Speech Recognition (Web Speech API)
-    // ──────────────────────────────────────────────
-    function initSpeech() {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) {
-        console.warn('SpeechRecognition not supported');
-        return;
+    const data = await resp.json();
+    let translation = '';
+    if (data.candidates?.[0]?.content?.parts) {
+      for (const p of data.candidates[0].content.parts) {
+        if (p.text) translation += p.text;
       }
-      recognition = new SR();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.maxAlternatives = 1;
+    }
+    if (!translation) throw new Error('翻譯結果為空');
 
-      recognition.onresult = (event) => {
-        let interim = '';
-        let final = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            final += transcript;
-          } else {
-            interim += transcript;
-          }
-        }
-        if (interim) {
-          document.getElementById('textInput').value = interim;
-        }
-        if (final) {
-          document.getElementById('textInput').value = final;
-          // Auto-translate when final result arrives
-          setTimeout(() => translateText(), 200);
-        }
-      };
+    // Update bubble
+    setDstBubble(pair, translation);
+    setStatus('', 'ok');
 
-      recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        if (event.error === 'no-speech') {
-          setStatus('沒有偵測到語音，請再試一次');
-        } else if (event.error === 'not-allowed') {
-          setStatus('麥克風權限被拒絕，請在瀏覽器設定中允許', 'error');
-        } else {
-          setStatus('語音辨識錯誤: ' + event.error, 'error');
-        }
-        stopListening();
-      };
-
-      recognition.onend = () => {
-        stopListening();
-      };
+    // TTS
+    if (autoSpeak) {
+      await speakText(translation);
     }
 
-    function getRecognitionLang() {
-      if (mode === 'zh-en') return 'zh-TW';
-      if (mode === 'en-zh') return 'en-US';
-      // auto mode: default to zh-TW (can also pick up English)
-      return 'zh-TW';
+  } catch(err) {
+    setDstBubble(pair, '❌ ' + err.message, true);
+    setStatus(err.message, 'error');
+  }
+
+  isTranslating = false;
+
+  // Resume listening
+  if (listenMode) {
+    scheduleRestart(autoSpeak ? 200 : 300);
+  }
+}
+
+// ── Text input fallback ──────────────────────────────
+function onSendText() {
+  const inp = document.getElementById('textInput');
+  const t = inp.value.trim();
+  inp.value = '';
+  if (t) translateText(t);
+}
+
+function translateText(text) {
+  if (!text) return;
+  if (!apiKey) { openSettings(); setStatus('請先輸入 API Key','error'); return; }
+  doTranslate(text);
+}
+
+// ═══════════════════════════════════════════════════════
+//  TTS
+// ═══════════════════════════════════════════════════════
+function speakText(text) {
+  return new Promise((resolve) => {
+    if (!window.speechSynthesis) { resolve(); return; }
+    speechSynthesis.cancel();
+
+    const isChinese = /[\u4e00-\u9fff]/.test(text);
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = isChinese ? 'zh-TW' : 'en-US';
+    utter.rate = 1.05;
+
+    isSpeaking = true;
+    setMicState('speaking');
+    if (listenMode && pauseOnTTS) {
+      try { recog && recog.abort(); } catch(e) {}
     }
 
-    function toggleMic() {
-      if (!recognition) {
-        setStatus('此瀏覽器不支援語音辨識，請用 Chrome', 'error');
-        return;
-      }
-      if (isListening) {
-        recognition.stop();
-        stopListening();
+    utter.onend = utter.onerror = () => {
+      isSpeaking = false;
+      if (listenMode) {
+        setMicState('listening');
+        scheduleRestart(300);
       } else {
-        if (!apiKey) {
-          toggleSettings();
-          setStatus('請先輸入 API Key', 'error');
-          return;
-        }
-        recognition.lang = getRecognitionLang();
-        try {
-          recognition.start();
-          startListening();
-        } catch (e) {
-          // Sometimes recognition isn't ready yet
-          console.error(e);
-          setStatus('語音啟動失敗，請再試一次', 'error');
-        }
+        setMicState('idle');
       }
-    }
+      resolve();
+    };
 
-    function startListening() {
-      isListening = true;
-      document.getElementById('micBtn').classList.add('listening');
-      setStatus('正在聆聽...');
-    }
+    speechSynthesis.speak(utter);
+  });
+}
 
-    function stopListening() {
-      isListening = false;
-      document.getElementById('micBtn').classList.remove('listening');
-    }
+// ═══════════════════════════════════════════════════════
+//  Feed / bubbles
+// ═══════════════════════════════════════════════════════
+let pairCount = 0;
 
-    // ──────────────────────────────────────────────
-    //  Translation via Gemini Interactions API
-    // ──────────────────────────────────────────────
-    async function translateText() {
-      const text = document.getElementById('textInput').value.trim();
-      if (!text) return;
+function hideFeedEmpty() {
+  const e = document.getElementById('feedEmpty');
+  if (e) e.style.display = 'none';
+}
 
-      if (!apiKey) {
-        toggleSettings();
-        setStatus('請先輸入 API Key', 'error');
-        return;
-      }
+function addPair(srcText) {
+  const id = 'pair-' + (++pairCount);
+  const feed = document.getElementById('feed');
 
-      // Show original
-      document.getElementById('emptyHint').style.display = 'none';
-      document.getElementById('originalCard').style.display = 'block';
-      document.getElementById('originalText').textContent = text;
-      document.getElementById('originalLabel').textContent = '原文';
+  const pair = document.createElement('div');
+  pair.className = 'pair';
+  pair.id = id;
 
-      // Show loading state on translation card
-      document.getElementById('translationCard').style.display = 'block';
-      document.getElementById('translationText').textContent = '翻譯中...';
-      document.getElementById('translationText').classList.add('placeholder');
+  // Source bubble
+  const src = document.createElement('div');
+  src.className = 'bubble src';
+  src.textContent = srcText;
+  pair.appendChild(src);
 
-      setStatus('翻譯中...', 'busy');
+  // Dest bubble (placeholder)
+  const dst = document.createElement('div');
+  dst.className = 'bubble dst translating';
+  dst.textContent = '翻譯中…';
+  dst.id = id + '-dst';
+  pair.appendChild(dst);
 
-      // Build request — every request is stateless, system prompt always included
-      // API format verified from Google docs:
-      // https://aistudio.google.com/docs/text-generation
-      // Endpoint: POST https://generativelanguage.googleapis.com/v1beta/interactions
-      // Headers: x-goog-api-key, Content-Type, Api-Revision
-      // Body: { model, system_instruction, input, store, generation_config }
-      // Response: steps[] → find type=model_output → content[0].text
+  feed.appendChild(pair);
+  feed.scrollTop = feed.scrollHeight;
+  return id;
+}
 
-      // generateContent API — supports browser CORS, available on v1beta
-      // Endpoint: POST /v1beta/models/{model}:generateContent?key={apiKey}
-      const requestBody = {
-        system_instruction: {
-          parts: [{ text: SYSTEM_PROMPT }]
-        },
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: text }]
-          }
-        ],
-        generationConfig: {
-          maxOutputTokens: 512,
-          temperature: 0.1
-        }
-      };
+function setDstBubble(pairId, text, isError) {
+  const dst = document.getElementById(pairId + '-dst');
+  if (!dst) return;
+  dst.textContent = text;
+  dst.classList.remove('translating');
+  if (isError) {
+    dst.style.color = 'var(--danger)';
+    dst.style.borderColor = 'var(--danger)';
+  } else {
+    // Add action buttons
+    const actions = document.createElement('div');
+    actions.className = 'bubble-actions';
 
-      try {
-        const resp = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
-          }
-        );
+    const speakBtn = document.createElement('button');
+    speakBtn.className = 'bact';
+    speakBtn.textContent = '🔊 朗讀';
+    speakBtn.onclick = () => speakText(text);
 
-        if (!resp.ok) {
-          const errBody = await resp.text();
-          let errMsg = `API 錯誤 (${resp.status})`;
-          try {
-            const errJson = JSON.parse(errBody);
-            if (errJson.error?.message) errMsg = errJson.error.message;
-          } catch (_) {}
-          throw new Error(errMsg);
-        }
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'bact';
+    copyBtn.textContent = '📋 複製';
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(text).then(() => setStatus('已複製', 'ok'));
+    };
 
-        const data = await resp.json();
+    actions.appendChild(speakBtn);
+    actions.appendChild(copyBtn);
 
-        // Extract translation from generateContent response:
-        // data.candidates[0].content.parts[0].text
-        let translation = '';
-        if (data.candidates && data.candidates[0]?.content?.parts) {
-          for (const part of data.candidates[0].content.parts) {
-            if (part.text) translation += part.text;
-          }
-        }
+    const pair = document.getElementById(pairId);
+    pair.appendChild(actions);
+  }
 
-        if (!translation) {
-          throw new Error('翻譯結果為空');
-        }
+  // Scroll
+  const feed = document.getElementById('feed');
+  feed.scrollTop = feed.scrollHeight;
+}
 
-        lastTranslation = translation;
+// ═══════════════════════════════════════════════════════
+//  UI helpers
+// ═══════════════════════════════════════════════════════
+function setMicState(s) {
+  micState = s;
+  const btn  = document.getElementById('micBtn');
+  const ring = document.getElementById('micRing');
+  btn.className  = 'mic-btn ' + s;
+  ring.className = 'mic-ring ' + (s === 'listening' ? 'active' : s === 'speaking' ? 'speaking' : '');
 
-        // Display
-        document.getElementById('translationText').textContent = translation;
-        document.getElementById('translationText').classList.remove('placeholder');
+  const icons = { idle:'🎤', listening:'🔴', translating:'⏳', speaking:'🔊' };
+  btn.textContent = icons[s] || '🎤';
+}
 
-        // Determine direction label
-        const isChineseInput = /[\u4e00-\u9fff]/.test(text);
-        document.getElementById('translationLabel').textContent =
-          isChineseInput ? '英文翻譯' : '中文翻譯';
-        document.getElementById('originalLabel').textContent =
-          isChineseInput ? '中文原文' : '英文原文';
+function setMicLabel(t) {
+  document.getElementById('micLabel').textContent = t;
+}
 
-        // Save to history
-        addHistory(text, translation);
+function setCaption(t, active) {
+  const el = document.getElementById('liveCaption');
+  el.textContent = t || '　';
+  el.classList.toggle('active', active && !!t);
+}
 
-        // Clear input
-        document.getElementById('textInput').value = '';
+function setStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg || '';
+  el.className = 'status-strip' + (type ? ' ' + type : '');
+}
 
-        setStatus('');
+function setDir(d) {
+  dir = d;
+  localStorage.setItem(SK.dir, d);
+  document.querySelectorAll('.dir-btn').forEach(b => b.classList.toggle('active', b.dataset.dir === d));
+  if (recog) recog.lang = getSpeechLang();
+}
 
-        // Auto-speak
-        if (autoSpeak) {
-          speak(translation, isChineseInput ? 'en-US' : 'zh-TW');
-        }
+// ═══════════════════════════════════════════════════════
+//  Settings
+// ═══════════════════════════════════════════════════════
+function openSettings() {
+  document.getElementById('apiKeyInput').value = apiKey;
+  document.getElementById('modelSel').value = model;
+  document.getElementById('speechLangSel').value = speechLang;
+  document.getElementById('autoSpeakTog').classList.toggle('on', autoSpeak);
+  document.getElementById('pauseOnTTSTog').classList.toggle('on', pauseOnTTS);
+  document.getElementById('sheetBg').classList.add('show');
+}
 
-      } catch (err) {
-        console.error('Translation error:', err);
-        document.getElementById('translationText').textContent = '❌ ' + err.message;
-        document.getElementById('translationText').classList.remove('placeholder');
-        setStatus(err.message, 'error');
-      }
-    }
+function closeSettings() {
+  apiKey    = document.getElementById('apiKeyInput').value.trim();
+  model     = document.getElementById('modelSel').value;
+  speechLang= document.getElementById('speechLangSel').value;
+  localStorage.setItem(SK.key,   apiKey);
+  localStorage.setItem(SK.model, model);
+  localStorage.setItem(SK.slang, speechLang);
+  document.getElementById('sheetBg').classList.remove('show');
+  if (apiKey) setStatus('');
+}
 
-    // ──────────────────────────────────────────────
-    //  Text-to-Speech (Web Speech API)
-    // ──────────────────────────────────────────────
-    function speak(text, lang) {
-      if (!window.speechSynthesis) return;
-      speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = lang || 'zh-TW';
-      utter.rate = 1.0;
-      speechSynthesis.speak(utter);
-    }
+function toggleAutoSpeak() {
+  autoSpeak = !autoSpeak;
+  localStorage.setItem(SK.spk, autoSpeak);
+  document.getElementById('autoSpeakTog').classList.toggle('on', autoSpeak);
+}
 
-    function speakTranslation() {
-      if (lastTranslation) {
-        const isChineseResult = /[\u4e00-\u9fff]/.test(lastTranslation);
-        speak(lastTranslation, isChineseResult ? 'zh-TW' : 'en-US');
-      }
-    }
+function togglePauseOnTTS() {
+  pauseOnTTS = !pauseOnTTS;
+  localStorage.setItem(SK.pause, pauseOnTTS);
+  document.getElementById('pauseOnTTSTog').classList.toggle('on', pauseOnTTS);
+}
 
-    // ──────────────────────────────────────────────
-    //  Copy
-    // ──────────────────────────────────────────────
-    function copyTranslation() {
-      if (!lastTranslation) return;
-      navigator.clipboard.writeText(lastTranslation).then(() => {
-        setStatus('已複製到剪貼簿');
-        setTimeout(() => setStatus(''), 2000);
-      }).catch(() => {
-        setStatus('複製失敗', 'error');
-      });
-    }
+// ═══════════════════════════════════════════════════════
+//  Init
+// ═══════════════════════════════════════════════════════
+function init() {
+  document.querySelectorAll('.dir-btn').forEach(b => b.classList.toggle('active', b.dataset.dir === dir));
+  if (!SR) setStatus('此裝置不支援語音辨識，可用打字模式', 'error');
+  if (!apiKey) setTimeout(() => { openSettings(); setStatus('請先輸入 API Key','error'); }, 400);
+  initRecog();
+}
 
-    // ──────────────────────────────────────────────
-    //  Mode
-    // ──────────────────────────────────────────────
-    function setMode(m) {
-      mode = m;
-      localStorage.setItem(STORAGE_MODE, m);
-      document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.mode === m);
-      });
-    }
+init();
 
-    // ──────────────────────────────────────────────
-    //  Settings
-    // ──────────────────────────────────────────────
-    function toggleSettings() {
-      const overlay = document.getElementById('settingsOverlay');
-      overlay.classList.toggle('show');
-      // Save settings when opening
-      if (overlay.classList.contains('show')) {
-        document.getElementById('apiKeyInput').value = apiKey;
-        document.getElementById('modelSelect').value = model;
-      }
-    }
-
-    // Save settings on close
-    document.getElementById('settingsOverlay').addEventListener('click', function(e) {
-      if (e.target === this) {
-        saveSettings();
-      }
-    });
-
-    // Also save when clicking the close button
-    document.querySelector('.settings-close').addEventListener('click', saveSettings);
-
-    function saveSettings() {
-      apiKey = document.getElementById('apiKeyInput').value.trim();
-      model = document.getElementById('modelSelect').value;
-      localStorage.setItem(STORAGE_KEY, apiKey);
-      localStorage.setItem(STORAGE_MODEL, model);
-      document.getElementById('settingsOverlay').classList.remove('show');
-      if (apiKey) setStatus('');
-    }
-
-    // ──────────────────────────────────────────────
-    //  Auto-speak toggle
-    // ──────────────────────────────────────────────
-    function toggleAutoSpeak() {
-      autoSpeak = !autoSpeak;
-      localStorage.setItem(STORAGE_AUTOSPEAK, autoSpeak);
-      document.getElementById('autoSpeakToggle').classList.toggle('on', autoSpeak);
-      document.getElementById('autoSpeakBtn').classList.toggle('active', autoSpeak);
-    }
-
-    // ──────────────────────────────────────────────
-    //  History
-    // ──────────────────────────────────────────────
-    function addHistory(original, translation) {
-      history.unshift({ original, translation, time: Date.now() });
-      if (history.length > 50) history = history.slice(0, 50);
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-      renderHistory();
-    }
-
-    function renderHistory() {
-      const section = document.getElementById('historySection');
-      const list = document.getElementById('historyList');
-      if (history.length === 0) {
-        section.style.display = 'none';
-        return;
-      }
-      section.style.display = 'block';
-      list.innerHTML = history.map(h => `
-        <div class="history-item">
-          <div class="h-original">${escapeHtml(h.original)}</div>
-          <div class="h-translation">${escapeHtml(h.translation)}</div>
-        </div>
-      `).join('');
-    }
-
-    function clearHistory() {
-      history = [];
-      localStorage.removeItem(HISTORY_KEY);
-      renderHistory();
-    }
-
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    // ──────────────────────────────────────────────
-    //  Status
-    // ──────────────────────────────────────────────
-    function setStatus(msg, type) {
-      const bar = document.getElementById('statusBar');
-      bar.textContent = msg || '';
-      bar.className = 'status-bar' + (type ? ' ' + type : '');
-    }
-
-    // ──────────────────────────────────────────────
-    //  Start
-    // ──────────────────────────────────────────────
-    init();
-
-    // ── PWA Service Worker ──
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(function (e) {
-        console.log('SW register failed:', e);
-      });
-    }
-  </script>
+// PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
 </body>
 </html>
